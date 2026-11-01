@@ -20,26 +20,50 @@ if (strpos($currentUrl, 'settings') !== false) $active = 'settings';
 <div class="nav-menu">
     <div class="nav-label">Operations</div>
     <a href="<?= base_url('admin/active-orders') ?>" class="nav-link <?= ($active === 'active-orders') ? 'active' : '' ?>">
-         Active Orders
+               <img
+                                src="<?= base_url('images/basket.svg') ?>"
+                                alt=""
+                                class="basket-icon"
+                            > Active Orders
     </a>
     <a href="<?= base_url('admin/completed-orders') ?>" class="nav-link <?= ($active === 'completed-orders') ? 'active' : '' ?>">
-         Completed Orders
+         <img
+                                src="<?= base_url('images/bookmark-check.svg') ?>"
+                                alt=""
+                                class="bookmark-icon"
+                            > Completed Orders
     </a>
 
     <div class="nav-label" style="margin-top: 1.5rem;">Management</div>
     <a href="<?= base_url('admin/analytics') ?>" class="nav-link <?= ($active === 'analytics') ? 'active' : '' ?>">
-         Analytics
+       <img
+                                src="<?= base_url('images/bar-chart.svg') ?>"
+                                alt=""
+                                class="barchart-icon"
+                            >   Analytics
     </a>
     <a href="<?= base_url('admin/payment-logs') ?>" class="nav-link <?= ($active === 'payment-logs') ? 'active' : '' ?>">
-         Payment Logs
+        <img
+                                src="<?= base_url('images/credit-card.svg') ?>"
+                                alt=""
+                                class="credit-icon"
+                            > Payment Logs
     </a>
     <a href="<?= base_url('admin/settings') ?>" class="nav-link <?= ($active === 'settings') ? 'active' : '' ?>">
-        ⚙️ Settings
+        <img
+                                src="<?= base_url('images/settings-icon.svg') ?>"
+                                alt=""
+                                class="setting-icon"
+                            > Settings
     </a>
 </div>
 
 <div class="logout-wrap">
     <a href="<?= base_url('logout') ?>" class="nav-link nav-link-logout">
-        🚪 Logout
+        <img
+                                src="<?= base_url('images/logout-exit.svg') ?>"
+                                alt=""
+                                class="setting-icon"
+                                > Logout
     </a>
 </div>

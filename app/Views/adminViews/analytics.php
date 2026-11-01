@@ -95,19 +95,35 @@
             <!-- STAT CARDS -->
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-label"><span id="label-revenue">Total Revenue</span><div class="stat-icon green">💰</div></div>
+                    <div class="stat-label"><span id="label-revenue">Total Revenue</span><div class="stat-icon green"> <img
+                                src="<?= base_url('images/dollar-currency.svg') ?>"
+                                alt=""
+                                class="chart-icon"
+                            ></div></div>
                     <div class="stat-value" id="stat-revenue">₱0</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label"><span id="label-orders">Total Orders</span><div class="stat-icon blue">📦</div></div>
+                    <div class="stat-label"><span id="label-orders">Total Orders</span><div class="stat-icon blue"> <img
+                                src="<?= base_url('images/cube-box.svg') ?>"
+                                alt=""
+                                class="chart-icon"
+                            ></div></div>
                     <div class="stat-value" id="stat-orders">0</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">Avg Order Value<div class="stat-icon amber">📈</div></div>
+                    <div class="stat-label">Avg Order Value<div class="stat-icon amber"> <img
+                                src="<?= base_url('images/chart-analytics-graph.svg') ?>"
+                                alt=""
+                                class="chart-icon"
+                            ></div></div>
                     <div class="stat-value" id="stat-avg">₱0</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">Total Unpaid Balance<div class="stat-icon red">⚠️</div></div>
+                    <div class="stat-label">Total Unpaid Balance<div class="stat-icon red"> <img
+                                src="<?= base_url('images/alert-error.svg') ?>"
+                                alt=""
+                                class="chart-icon"
+                            ></div></div>
                     <div class="stat-value" id="stat-unpaid">₱0</div>
                     <div class="stat-trend down"><span id="unpaid-count">0</span> orders unpaid</div>
                 </div>
@@ -296,19 +312,31 @@
         const todayAvg = todayComp.length > 0 ? todayRev / todayComp.length : 0;
 
         document.getElementById("snapshot-list").innerHTML = `
-            <div class="snapshot-row"><span class="snap-label">💰 Revenue today</span><span class="snap-value green">₱${todayRev.toFixed(0)}</span></div>
-            <div class="snapshot-row"><span class="snap-label">📦 Orders processed</span><span class="snap-value">${todayComp.length}</span></div>
-            <div class="snapshot-row"><span class="snap-label">🌀 Orders in progress</span><span class="snap-value blue">${todayAct.filter(o=>o.stage!=='ready').length}</span></div>
-            <div class="snapshot-row"><span class="snap-label">✅ Orders ready</span><span class="snap-value green">${todayAct.filter(o=>o.stage==='ready').length}</span></div>
+            <div class="snapshot-row"><span class="snap-label"><img src="<?= base_url('images/dollar-currency.svg') ?>" 
+           alt="" 
+           style="width: 16px; height: 16px; vertical-align: middle; margin-right: 1px;"> Revenue today</span><span class="snap-value green">₱${todayRev.toFixed(0)}</span></div>
+            <div class="snapshot-row"><span class="snap-label"><img src="<?= base_url('images/cube-box.svg') ?>" 
+           alt="" 
+           style="width: 16px; height: 16px; vertical-align: middle; margin-right: 1px;"> Orders processed</span><span class="snap-value">${todayComp.length}</span></div>
+            <div class="snapshot-row"><span class="snap-label"><img src="<?= base_url('images/clock-time-countdown-arrow.svg') ?>" 
+           alt="" 
+           style="width: 16px; height: 16px; vertical-align: middle; margin-right: 1px;"> Orders in progress</span><span class="snap-value blue">${todayAct.filter(o=>o.stage!=='ready').length}</span></div>
+            <div class="snapshot-row"><span class="snap-label"><img src="<?= base_url('images/check-box-list-square.svg') ?>" 
+           alt="" 
+           style="width: 16px; height: 16px; vertical-align: middle; margin-right: 1px;"> Orders ready</span><span class="snap-value green">${todayAct.filter(o=>o.stage==='ready').length}</span></div>
             <div class="snapshot-divider"></div>
-            <div class="snapshot-row"><span class="snap-label">⚠️ Unpaid today</span><span class="snap-value ${todayUnpaid>0?'red':''}">₱${todayUnpaid.toFixed(0)}</span></div>
-            <div class="snapshot-row"><span class="snap-label">📊 Avg order value</span><span class="snap-value">₱${todayAvg.toFixed(0)}</span></div>
+            <div class="snapshot-row"><span class="snap-label"><img src="<?= base_url('images/alert-error.svg') ?>" 
+           alt="" 
+           style="width: 16px; height: 16px; vertical-align: middle; margin-right: 1px;"> Unpaid today</span><span class="snap-value ${todayUnpaid>0?'red':''}">₱${todayUnpaid.toFixed(0)}</span></div>
+            <div class="snapshot-row"><span class="snap-label"><img src="<?= base_url('images/bar-chart-analytics.svg') ?>" 
+           alt="" 
+           style="width: 16px; height: 16px; vertical-align: middle; margin-right: 1px;"> Avg order value</span><span class="snap-value">₱${todayAvg.toFixed(0)}</span></div>
         `;
 
         // 5. Unpaid Orders List
         document.getElementById("unpaid-total").textContent = `₱${allData.unpaidTotal.toFixed(0)}`;
         if (allData.unpaidOrders.length === 0) {
-            document.getElementById("unpaid-list").innerHTML = `<div class="empty-state">No unpaid orders 🎉</div>`;
+            document.getElementById("unpaid-list").innerHTML = `<div class="empty-state">No unpaid orders </div>`;
         } else {
             document.getElementById("unpaid-list").innerHTML = allData.unpaidOrders.map(o => `
                 <div class="unpaid-item">
