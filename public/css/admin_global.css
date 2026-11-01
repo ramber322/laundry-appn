@@ -1,0 +1,218 @@
+:root {
+    /* Backgrounds */
+    --bg: #f4f8fb;                /* Very soft icy blue for the main content area */
+    --card-bg: #ffffff;           /* Pure white for cards and sidebar */
+    
+    /* Sidebar */
+    --sidebar-width: 250px;
+    --sidebar-border: #e6eef5;    /* Subtle blue-tinted border */
+    
+    /* Text */
+    --text-main: #1e293b;         /* Dark navy/slate for headings */
+    --text-muted: #64748b;        /* Soft blue-grey for secondary text */
+    
+    /* Active State (Soft Blue) */
+    --active-bg: #e0f2fe;         /* Light sky blue background */
+    --active-text: #0284c7;       /* Vibrant sky blue for text/icons */
+
+    /* Brand & Buttons (Modern Sky Blue) */
+    --primary: #0ea5e9;           
+    --primary-hover: #0284c7;     
+    --primary-text: #ffffff;
+
+    /* Status Colors */
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+
+    /* Borders & Shadows */
+    --border: #e2e8f0;
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.02);
+    --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+* { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+    font-family: 'Segoe UI', system-ui, sans-serif; 
+}
+
+body {
+    background: var(--bg);
+    color: var(--text-main);
+    min-height: 100vh;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+
+.admin-layout {
+    display: flex;
+    height: 100vh;
+}
+
+/* ─────────── SIDEBAR ─────────── */
+.sidebar {
+    width: var(--sidebar-width);
+    background: var(--card-bg);
+    border-right: 1px solid var(--sidebar-border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    height: 100vh;
+    padding: 1rem 0;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem 2rem;
+}
+
+.brand-icon {
+    background: transparent;
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    font-size: 1.5rem;
+    color: var(--active-text);
+}
+
+.nav-menu {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    gap: 0.25rem;
+    padding: 0 1rem;
+}
+
+.nav-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 1rem 0.5rem 0.5rem;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.75rem 1rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+    background: var(--bg);
+    color: var(--text-main);
+}
+
+/* The soft blue active state */
+.nav-link.active {
+    background: var(--active-bg);
+    color: var(--active-text);
+    font-weight: 600;
+}
+
+.logout-wrap {
+    margin-top: auto;
+    padding: 1rem 1rem 0;
+    border-top: 1px solid var(--sidebar-border);
+}
+
+.nav-link-logout {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.75rem 1rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+}
+
+.nav-link-logout:hover {
+    background: #fef2f2;
+    color: var(--danger);
+}
+
+/* ─────────── MAIN CONTENT ─────────── */
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--bg);
+}
+
+.topbar {
+    background: var(--bg); 
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+/* This targets your "Active Pipeline" title */
+.topbar h2 {
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    color: var(--text-main) !important;
+    letter-spacing: -0.02em;
+}
+
+.content-area {
+    padding: 0 2rem 2rem 2rem;
+    flex: 1;
+    overflow-y: auto;
+}
+
+/* ─────────── CARDS & TABLES ─────────── */
+/* Toolbar and Table containers become the floating white cards */
+.toolbar, 
+.table-container {
+    background: var(--card-bg);
+    border-radius: 20px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border); 
+    padding: 1.5rem;
+}
+
+/* ─────────── BUTTONS ─────────── */
+.btn-new {
+    background: var(--primary);
+    color: var(--primary-text);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
+}
+
+.btn-new:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(14, 165, 233, 0.35);
+}
+
+.btn-new:active {
+    transform: translateY(0);
+}

@@ -2,105 +2,64 @@
 
 namespace App\Controllers;
 
+use App\Models\UserModel;
+
 class Home extends BaseController
 {
-    public function index(): string
+    // ==========================================
+    // PUBLIC ROUTES
+    // ==========================================
+    public function index()
     {
-       $data = [
-    'name'    => 'Ramber, Abdul Malik P.',
-    'title'   => 'Web Developer',
-    'tagline' => '4th Year BS-IT student looking forward to work as web developer.',
-    'photo' => 'images/profile-icon.png',
-    'contact' => [
-        'email'    => 'ramber@gmail.com',
-        'phone'    => '+63 912 345 6789',
-        'address'  => 'Philippines',
-        'github'   => 'https://github.com/ramber322',
-        'linkedin' => 'https://linkedin.com/in/ramber322',
-    ],
-    'personal' => [
-        'Date of Birth'  => 'January 1, 2003',
-        'Place of Birth' => 'Iligan, Philippines',
-        'Nationality'    => 'Filipino',
-    ],
-    'objective' => 'To work as a web developer and continue learning through real projects.',
-    'full_personal' => [
-        'Surname'          => 'Ramber',
-        'First Name'       => 'Abdul Malik',
-        'Middle Name'      => 'Putin',
-        'Name Extension'   => 'N/A',
-        'Date of Birth'    => '1/1/2003',
-        'Place of Birth'   => 'Iligan, Philippines',
-        'Sex at Birth'     => 'Male',
-        'Civil Status'     => 'Single',
-        'Height (m)'       => '1.75',
-        'Weight (kg)'      => '55',
-        'Blood Type'       => 'O+',
-        'Citizenship'      => 'Filipino',
-        'Residential Address' => 'Purok 5, Maria Subdivision, Baraas, Iligan City, Lanao Del Norte',
-        'Permanent Address'   => 'Purok 5, Maria Subdivision, Baraas, Iligan City, Lanao Del Norte',
-        'Zip Code'    => '9200',
-        'Telephone No.'    => '(02) 8123-4567',
-        'Mobile No.'       => '0917-123-4567',
-        'Email'            => 'ramber123@gmail.com',
-        'Civil Service Eligibility' => 'Career Service Professional',
-    ],
-    'education' => [
-        [
-            'school' => 'St Peters College',
-            'degree' => 'BS in Information Technology',
-            'year'   => '2022 - Present',
-        ],
-        [
-            'school' => 'Corpus Christi Parochial School of Iligan',
-            'degree' => 'Junior/Senior High School',
-            'year'   => '2016 - 2022',
-        ],
-         [
-            'school' => 'South 1-A Central School',
-            'degree' => 'Elementary School',
-            'year'   => '2010 - 2016',
-        ],
-    ],
-    'experience' => [
-    [
-        'from'     => '08/01/2022',
-        'to'       => '30/05/2024',
-        'position' => 'Information Technology Officer II',
-        'company'  => ' Department of Information and Communications Technology (DICT)',
-    ],
-    [
-        'from'     => '08/01/2020',
-        'to'       => '30/05/2021',
-        'position' => 'IT Support Specialist',
-        'company'  => 'ABC Corporation, Makati City',
-    ],
-],
-    'skills' => [
-        'Frontend' => ['React', 'JavaScript', 'HTML', 'CSS'],
-        'Backend'  => ['PHP', 'Laravel','CodeIgniter 4', 'NodeJS', 'MySQL'],
-        'Tools'    => ['Git', 'VS Code', 'Figma'],
-    ],
-    'projects' => [
-        [
-            'title' => 'Movie App',
-            'desc'  => 'A movie browsing app that pulls film data from a public API.',
-            'link'  => 'https://github.com/ramber322',
-        ],
-        [
-            'title' => 'Grocery App',
-            'desc'  => 'A simple grocery list app for keeping track of items to buy.',
-            'link'  => 'https://github.com/ramber322',
-        ],
-        [
-            'title' => 'Posture Care',
-            'desc'  => 'A fitness app built to help users improve posture through guided routines.',
-            'link'  => 'https://github.com/ramber322',
-        ],
-    ],
-];
+        // Send guest/customer to default tracking page
+        return redirect()->to('/track');
+    }
 
-return view('portfolio_page', $data);
+    // ==========================================
+    // AUTHENTICATION
+    // ==========================================
+    public function showLogin()
+    {
+        // If they are already logged in, send them to the dashboard
+        if (session()->get('isLoggedIn')) {
+            return redirect()->to('admin/active-orders');
+        }
+        return view('login'); 
+    }
 
+    public function attemptLogin()
+    {
+        $session = session();
+        $model = new UserModel();
+
+        $email = $this->request->getVar('email');
+        $password = $this->request->getVar('password');
+
+        $user = $model->where('email', $email)->first();
+
+        if ($user && password_verify($password, $user['password_hash'])) {
+            // Success - Set Session
+            $session->set([
+                'id'         => $user['id'],
+                'name'       => $user['name'],
+                'email'      => $user['email'],
+                'role'       => $user['role'],
+                'isLoggedIn' => true,
+            ]);
+            return redirect()->to('admin/active-orders');
+        } else {
+            // Fail
+            $session->setFlashdata('error', 'Invalid email or password.');
+            return redirect()->to('/login'); // Changed from /admin/login
+        }
+    }
+
+    public function logout()
+    {
+        // Destroy the session so the auth filter blocks them
+        session()->destroy();
+        
+        // Send them back to the login screen
+        return redirect()->to('/login'); // Changed from /admin/login
     }
 }
