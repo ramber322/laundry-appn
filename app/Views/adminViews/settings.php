@@ -64,7 +64,9 @@
         <header class="topbar">
             <h2 style="font-size: 1.25rem; color: var(--text);">Settings</h2>
             <!-- Form submit button outside the form using the 'form' attribute -->
-            <button type="submit" form="settingsForm" class="btn-save">💾 Save All Changes</button>
+            <button type="submit" form="settingsForm" class="btn-save"><img src="<?= base_url('images/save-alt.svg') ?>" 
+           alt="" 
+           style="width: 14px; height: 14px;  "> Save Changes</button>
         </header>
 
         <div class="content-area">
@@ -82,9 +84,15 @@
                     <!-- LEFT NAV -->
                     <aside class="settings-nav">
                         <div class="settings-nav-title">Settings</div>
-                        <a href="#shop" class="settings-nav-link active" onclick="scrollToSection('shop', this)">🏪 Shop Information</a>
-                        <a href="#pricing" class="settings-nav-link" onclick="scrollToSection('pricing', this)">💰 Service Pricing</a>
-                        <a href="#sms" class="settings-nav-link" onclick="scrollToSection('sms', this)">📱 SMS Templates</a>
+                        <a href="#shop" class="settings-nav-link active" onclick="scrollToSection('shop', this)"><img src="<?= base_url('images/shop-store.svg') ?>" 
+           alt="" 
+           style="width: 15px; height: 15px;  "> Shop Information</a>
+                        <a href="#pricing" class="settings-nav-link" onclick="scrollToSection('pricing', this)"><img src="<?= base_url('images/dollar-currency.svg') ?>" 
+           alt="" 
+           style="width: 15px; height: 15px;  "> Service Pricing</a>
+                        <a href="#sms" class="settings-nav-link" onclick="scrollToSection('sms', this)"><img src="<?= base_url('images/sms-icon.svg') ?>" 
+           alt="" 
+           style="width: 14px; height: 14px;  "> SMS Templates</a>
                     </aside>
 
                     <!-- RIGHT CONTENT -->
@@ -94,7 +102,9 @@
                         <div class="settings-card" id="shop">
                             <div class="card-header">
                                 <div>
-                                    <div class="card-title">🏪 Shop Information</div>
+                                    <div class="card-title"><img src="<?= base_url('images/shop-store.svg') ?>" 
+           alt="" 
+           style="width: 18px; height: 18px; vertical-align: middle; margin-bottom: 4px; margin-right: 6px;"> Shop Information</div>
                                     <div class="card-subtitle">Basic details about your laundry business</div>
                                 </div>
                             </div>
@@ -118,7 +128,12 @@
                         <div class="settings-card" id="pricing">
                             <div class="card-header">
                                 <div>
-                                    <div class="card-title">💰 Service Pricing</div>
+                                  <div class="card-title">
+  <img src="<?= base_url('images/dollar-currency.svg') ?>" 
+       alt="" 
+       style="width: 18px; height: 18px; vertical-align: middle; margin-bottom: 4px; margin-right: 6px;">
+  Service Pricing
+</div>
                                     <div class="card-subtitle">Price per kg for each service type</div>
                                 </div>
                             </div>
@@ -146,27 +161,28 @@
                         <div class="settings-card" id="sms">
                             <div class="card-header">
                                 <div>
-                                    <div class="card-title">📱 SMS Templates</div>
+                                    <div class="card-title"><img src="<?= base_url('images/sms-icon.svg') ?>" 
+           alt="" 
+           style="width: 18px; height: 18px; vertical-align: middle; margin-bottom: 4px; margin-right: 6px;"> SMS Templates</div>
                                     <div class="card-subtitle">Messages sent automatically to customers</div>
                                 </div>
                             </div>
-                            <div class="settings-form">
-                                <div class="form-group">
-                                    <label>Intake Confirmation</label>
-                                    <textarea name="sms_intake" class="form-control" rows="3"><?= esc($settings['sms_intake'] ?? '') ?></textarea>
-                                    <div class="helper-text">
-                                        Tags: <code>{name}</code>, <code>{code}</code>, <code>{weight}</code>, <code>{tracking_link}</code>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label>Ready for Pickup</label>
-                                    <textarea name="sms_ready" class="form-control" rows="2"><?= esc($settings['sms_ready'] ?? '') ?></textarea>
-                                    <div class="helper-text">
-                                        Tags: <code>{name}</code>, <code>{code}</code>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <div class="settings-form">
+    <div class="form-group">
+        <label>Intake Confirmation</label>
+        <textarea name="sms_intake" class="form-control" rows="3"><?= esc($settings['sms_intake'] ?? '') ?></textarea>
+        <div class="helper-text">
+            Tags: <code>{name}</code>, <code>{code}</code>, <code>{weight}</code>, <code>{tracking_link}</code>, <code>{shop_name}</code>
+        </div>
+    </div>
+    <div class="form-group">
+        <label>Ready for Pickup</label>
+        <textarea name="sms_ready" class="form-control" rows="2"><?= esc($settings['sms_ready'] ?? '') ?></textarea>
+        <div class="helper-text">
+            Tags: <code>{name}</code>, <code>{code}</code>, <code>{shop_name}</code>
+        </div>
+    </div>
+</div>
 
                     </div>
                 </div>

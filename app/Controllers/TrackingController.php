@@ -8,12 +8,21 @@ use App\Models\OrderModel;
 class TrackingController extends BaseController
 {
     // 1. Show the Search Page (or the Order Page if a code is passed)
-   public function index()
+ public function index()
 {
     $code = $this->request->getGet('code');
 
+    // Load settings FIRST — always available, no matter which branch
+    $db = \Config\Database::connect();
+    $results = $db->table('settings')->get()->getResultArray();
+    $settings = [];
+    foreach ($results as $row) {
+        $settings[$row['setting_key']] = $row['setting_value'];
+    }
+
+    // Empty search page — still pass settings
     if (!$code) {
-        return view('tracking'); // Show empty search box
+        return view('tracking', ['settings' => $settings]);
     }
 
     $orderModel = new OrderModel();
@@ -23,17 +32,9 @@ class TrackingController extends BaseController
         return redirect()->to('/track')->with('error', 'Order not found. Please check your code.');
     }
 
-    // Fetch settings for the brand name
-    $db = \Config\Database::connect();
-    $results = $db->table('settings')->get()->getResultArray();
-    $settings = [];
-    foreach ($results as $row) {
-        $settings[$row['setting_key']] = $row['setting_value'];
-    }
-
     return view('tracking', [
-        'order' => $order,
-        'settings' => $settings
+        'order'    => $order,
+        'settings' => $settings,
     ]);
 }
 

@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login - SS Laundry</title>
+    <title>Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #f4f7f9;
@@ -17,7 +18,7 @@
             --card-bg: #ffffff;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Manrope', 'Segoe UI', system-ui, sans-serif; }
 
         body {
             background: var(--bg);
@@ -26,9 +27,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 1.5rem;
+            padding: 2rem 1.5rem;
             position: relative;
-            overflow: hidden;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         body::before {
@@ -38,8 +41,8 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle at 30% 40%, rgba(59,130,246,0.06), transparent 50%),
-                        radial-gradient(circle at 70% 60%, rgba(139,92,246,0.06), transparent 50%);
+            background: radial-gradient(circle at 30% 40%, rgba(59,130,246,0.08), transparent 50%),
+                        radial-gradient(circle at 70% 60%, rgba(139,92,246,0.08), transparent 50%);
             z-index: 0;
         }
 
@@ -48,24 +51,52 @@
             max-width: 420px;
             position: relative;
             z-index: 1;
+            flex-shrink: 0;
+            animation: fadeUp 0.4s ease;
         }
 
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Login card — icon + brand + form all inside ONE card */
+        .login-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.1),
+                        0 1px 3px rgba(0,0,0,0.04);
+        }
+
+        /* Brand block at the top of the card */
         .brand {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 1.75rem;
         }
 
         .brand-icon {
             width: 72px;
             height: 72px;
-            background: linear-gradient(135deg, var(--primary), #8b5cf6);
+            background: #ffffff;
+            border: 1px solid var(--border);
             border-radius: 20px;
-            display: inline-flex;
+            display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2.25rem;
-            margin-bottom: 1rem;
-            box-shadow: 0 10px 25px -5px rgba(59,130,246,0.4);
+            margin: 0 auto 1rem;
+            box-shadow: 0 10px 25px -5px rgba(59,130,246,0.25),
+                        0 1px 3px rgba(0,0,0,0.05);
+            padding: 12px;
+            box-sizing: border-box;
+        }
+
+        .brand-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
         }
 
         .brand-name {
@@ -79,14 +110,14 @@
             font-size: 0.85rem;
             color: var(--text-muted);
             margin-top: 0.35rem;
+            font-weight: 500;
         }
 
-        .login-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 2rem;
-            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.1);
+        /* Divider between brand and form */
+        .card-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 0 -2rem 1.5rem;
         }
 
         .login-title {
@@ -118,7 +149,6 @@
             position: relative;
         }
 
-        /* Icon wrapper on the LEFT side of the input */
         .input-icon {
             position: absolute;
             left: 0.9rem;
@@ -129,6 +159,7 @@
             align-items: center;
             justify-content: center;
             pointer-events: none;
+            opacity: 0.7;
         }
 
         .form-control {
@@ -138,24 +169,33 @@
             border-radius: 10px;
             font-size: 0.9rem;
             outline: none;
-            transition: all 0.15s;
+            transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
             font-family: inherit;
-            background: white;
+            background: #fafbfc;
+            color: var(--text);
+        }
+
+        .form-control:hover {
+            background: #ffffff;
+            border-color: #cbd5e1;
         }
 
         .form-control:focus {
+            background: #ffffff;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
         }
 
-        /* --- Global icon sizing (applies to mail, lock, and eye) --- */
+        .form-control::placeholder {
+            color: #94a3b8;
+        }
+
         .eye-icon {
             width: 18px;
             height: 18px;
             display: block;
         }
 
-        /* --- Password toggle button (right side) --- */
         .password-toggle {
             position: absolute;
             right: 0.6rem;
@@ -178,7 +218,6 @@
             background: #f1f5f9;
         }
 
-        /* Eye toggle is slightly larger than the left-side input icons */
         .password-toggle .eye-icon {
             width: 20px;
             height: 20px;
@@ -256,41 +295,17 @@
             gap: 0.5rem;
         }
 
-        .login-footer {
-            text-align: center;
-            margin-top: 1.5rem;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            line-height: 1.6;
-        }
-
-        .login-footer a {
-            color: var(--primary);
-            text-decoration: none;
-        }
-
-        .login-footer a:hover {
-            text-decoration: underline;
-        }
-
-        .security-note {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.35rem;
-            margin-top: 1rem;
-            font-size: 0.7rem;
-            color: var(--text-muted);
-        }
-
         @media (max-width: 480px) {
             .login-card {
                 padding: 1.5rem;
             }
+            .card-divider {
+                margin: 0 -1.5rem 1.5rem;
+            }
             .brand-icon {
                 width: 64px;
                 height: 64px;
-                font-size: 2rem;
+                padding: 10px;
             }
             .brand-name {
                 font-size: 1.25rem;
@@ -302,22 +317,26 @@
 
     <div class="login-container">
 
-        <!-- Brand -->
-        <div class="brand">
-            <div class="brand-icon">🧺</div>
-            <div class="brand-name">SS Laundry</div>
-            <div class="brand-tagline">Admin Dashboard</div>
-        </div>
-
-        <!-- Login card -->
+        <!-- Login card — icon, brand, and form all in ONE card -->
         <div class="login-card">
+
+            <!-- Brand -->
+            <div class="brand">
+                <div class="brand-icon">
+                    <img src="<?= base_url('images/laundry-icon.png') ?>" alt="logo">
+                </div>
+                <div class="brand-name">LaundryMate</div>
+            </div>
+
+            <!-- Divider -->
+            <div class="card-divider"></div>
 
             <div class="login-title">Welcome back</div>
             <div class="login-subtitle">Sign in to access the staff dashboard</div>
 
             <?php if (session()->getFlashdata('error')): ?>
                 <div class="error-message">
-                    <span>⚠️</span>
+                    <span></span>
                     <span><?= session()->getFlashdata('error') ?></span>
                 </div>
             <?php endif; ?>
@@ -341,7 +360,7 @@
                             id="email"
                             name="email"
                             class="form-control"
-                            placeholder="you@sslaundry.com"
+                            placeholder="you@laundry.com"
                             autocomplete="username"
                             required
                         >
@@ -403,14 +422,6 @@
 
         </div>
 
-        <!-- Footer -->
-        <div class="login-footer">
-            © 2025 SS Laundry · <a href="#">Privacy Policy</a> · <a href="#">Contact Support</a>
-            <div class="security-note">
-                 Secure admin access only
-            </div>
-        </div>
-
     </div>
 
 <script>
@@ -440,11 +451,11 @@
 
     function showForgotHelp() {
         alert(
-            "🔒 Password Reset\n\n" +
+            " Password Reset\n\n" +
             "For security reasons, password resets are handled by the shop owner.\n\n" +
             "Please contact:\n" +
-            "📞 0917-123-4567\n" +
-            "📧 admin@sslaundry.com"
+            " 0917-123-4567\n" +
+            " admin@sslaundry.com"
         );
     }
 

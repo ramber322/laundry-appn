@@ -8,7 +8,7 @@ use CodeIgniter\Router\RouteCollection;
 // PUBLIC ROUTES
 $routes->get('/', function() { return redirect()->to('/track'); });
 $routes->get('track', 'TrackingController::index');
-
+$routes->get('track/(:segment)', 'TrackingController::view/$1');
 
 // AUTH ROUTES
 $routes->get('login', 'Home::showLogin');

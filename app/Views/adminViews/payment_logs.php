@@ -11,8 +11,9 @@
        ========================================= */
 
     /* Topbar Export Button */
-    .btn-export { background: white; color: var(--text); border: 1px solid var(--border); padding: 0.6rem 1.2rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    .btn-export { background: white; color: var(--text); border: 1px solid var(--border); padding: 0.6rem 1.2rem; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: 0.2s; }
     .btn-export:hover { background: #f8fafc; border-color: var(--primary); color: var(--primary); }
+    .download-icon { width: 16px; height: 16px; }
 
     /* Summary Cards */
     .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
@@ -59,7 +60,10 @@
     <div class="main-content">
         <header class="topbar">
             <h2 style="font-size: 1.25rem; color: var(--text);">Payment Logs</h2>
-            <button class="btn-export">📥 Export CSV</button>
+            <button class="btn-export" onclick="exportPaymentsCsv()">
+                <img src="<?= base_url('images/download-icon-order.svg') ?>" alt="" class="download-icon">
+                Export CSV
+            </button>
         </header>
 
         <div class="content-area">
@@ -126,6 +130,9 @@
                                     data-name="<?= esc($p['name']) ?>"
                                     data-code="<?= esc($p['claim_code']) ?>"
                                     data-phone="<?= esc($p['phone']) ?>"
+                                    data-price="<?= esc($p['price']) ?>"
+                                    data-weight="<?= esc($p['weight']) ?>"
+                                    data-time="<?= date('g:i A', strtotime($p['completed_at'])) ?>"
                                 >
                                     <td style="text-align: center; color: var(--text-muted); font-weight: 600;"><?= $index + 1 ?></td>
                                     <td><span class="claim-code"><?= esc($p['claim_code']) ?></span></td>
@@ -158,6 +165,59 @@
 </div>
 
 <script>
+    // =========================================
+    // EXPORT CSV (respects active filters)
+    // =========================================
+    function exportPaymentsCsv() {
+        // Only export rows that are currently visible after filters
+        const rows = Array.from(document.querySelectorAll('.payment-row'))
+            .filter(row => row.style.display !== 'none');
+
+        if (rows.length === 0) {
+            alert('No payments to export with the current filters.');
+            return;
+        }
+
+        const csvData = [
+            ['Claim Code', 'Customer', 'Phone', 'Service', 'Weight (kg)', 'Amount Paid (PHP)', 'Date', 'Time']
+        ];
+
+        rows.forEach(row => {
+            // Convert "2026-11-01" -> "Nov 1, 2026" so Excel doesn't auto-convert to #####
+            const d = new Date(row.dataset.date + 'T00:00:00');
+            const niceDate = d.toLocaleDateString('en-US', {
+                month: 'short', day: 'numeric', year: 'numeric'
+            });
+
+            csvData.push([
+                row.dataset.code,
+                row.dataset.name,
+                row.dataset.phone,
+                row.dataset.service,
+                row.dataset.weight,
+                parseFloat(row.dataset.price).toFixed(2),
+                niceDate,
+                row.dataset.time,
+            ]);
+        });
+
+        // Build CSV with proper escaping (handles commas/quotes in names)
+        const csv = csvData
+            .map(r => r.map(c => `"${String(c ?? '').replace(/"/g, '""')}"`).join(','))
+            .join('\r\n');
+
+        // \uFEFF = UTF-8 BOM so Excel reads ₱ and accents correctly
+        const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `payment-logs-${new Date().toISOString().slice(0, 10)}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
     // =========================================
     // LIVE FILTERING (Date, Service, Search)
     // =========================================

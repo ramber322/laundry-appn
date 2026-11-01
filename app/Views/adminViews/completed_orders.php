@@ -79,7 +79,11 @@
     <div class="main-content">
         <header class="topbar">
             <h2 style="font-size: 1.25rem; color: var(--text);">Completed Orders</h2>
-            <button class="btn-export">📥 Export CSV</button>
+            <button class="btn-export" onclick="exportCompletedCsv()"><img
+                                src="<?= base_url('images/download-icon-order.svg') ?>"
+                                alt=""
+                                class="chart-icon"
+                            > Export CSV</button>
         </header>
 
         <div class="content-area">
@@ -203,6 +207,55 @@
 
 <script>
     // =========================================
+// EXPORT CSV (respects active filters)
+// =========================================
+function exportCompletedCsv() {
+    // Grab only the rows that are currently visible (not filtered out)
+    const rows = Array.from(document.querySelectorAll('.order-row'))
+        .filter(row => row.style.display !== 'none');
+
+    if (rows.length === 0) {
+        alert('No orders to export with the current filters.');
+        return;
+    }
+
+    // Header row
+    const csvData = [
+        ['Claim Code', 'Customer', 'Phone', 'Service', 'Weight (kg)', 'Amount (PHP)', 'Date', 'Time']
+    ];
+
+    // Map each visible row's data-* attributes into a row
+    rows.forEach(row => {
+        csvData.push([
+            row.dataset.code,
+            row.dataset.name,
+            row.dataset.phone,
+            row.dataset.service,
+            row.dataset.weight,
+            parseFloat(row.dataset.price).toFixed(2),
+            row.dataset.date,
+            row.dataset.time,
+        ]);
+    });
+
+    // Build CSV string with proper escaping (handles commas/quotes in names)
+    const csv = csvData
+        .map(r => r.map(c => `"${String(c ?? '').replace(/"/g, '""')}"`).join(','))
+        .join('\r\n');
+
+    // \uFEFF BOM so Excel reads ₱ and accents correctly
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `completed-orders-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+    // =========================================
     // 1. LIVE FILTERING (Date, Service, Search)
     // =========================================
     function filterTable() {
@@ -278,10 +331,14 @@
         
         document.getElementById('receipt-body').innerHTML = `
             <div style="text-align: center; margin-bottom: 1.5rem;">
-                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🧺</div>
-                <h2 style="font-size: 1.25rem; color: var(--text);">SS Laundry</h2>
-                <p style="font-size: 0.8rem; color: var(--text-muted);">123 Main St, Manila</p>
-            </div>
+        <img 
+            src="<?= base_url('images/laundry-icon.png') ?>" 
+            alt="LMlogo" 
+            style="width: 48px; height: 48px; object-fit: contain; margin-bottom: 0.5rem;"
+        >
+        <h2 style="font-size: 1.25rem; color: var(--text);">LaundryMate</h2>
+        <p style="font-size: 0.8rem; color: var(--text-muted);">123 Main St, Manila</p>
+    </div>
             
             <div class="receipt-row">
                 <span class="label">Receipt No.</span>

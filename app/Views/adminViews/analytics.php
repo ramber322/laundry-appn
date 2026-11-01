@@ -171,6 +171,7 @@
 </div>
 
 <script>
+    
     // 1. PHP INJECTS THE REAL SUPABASE DATA HERE
     const orders = <?= json_encode($orders) ?>;
     
