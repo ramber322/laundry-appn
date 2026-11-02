@@ -10,7 +10,7 @@ class SettingsController extends BaseController
     {
         $db = \Config\Database::connect();
         
-        // Fetch all settings and convert to an easy-to-use array: ['shop_name' => 'SS Laundry', ...]
+        // Fetch all settings and convert to easy-to-use array
         $results = $db->table('settings')->get()->getResultArray();
         $settings = [];
         foreach ($results as $row) {
@@ -23,8 +23,7 @@ class SettingsController extends BaseController
     public function save()
     {
         $db = \Config\Database::connect();
-        
-        // Data from the form
+
         $data = [
             'shop_name'      => $this->request->getPost('shop_name'),
             'shop_address'   => $this->request->getPost('shop_address'),
@@ -37,7 +36,6 @@ class SettingsController extends BaseController
 
         // Update each setting in the database
         foreach ($data as $key => $value) {
-            // Check if it exists first
             $exists = $db->table('settings')->where('setting_key', $key)->countAllResults();
             if ($exists) {
                 $db->table('settings')->where('setting_key', $key)->update(['setting_value' => $value]);
@@ -46,6 +44,15 @@ class SettingsController extends BaseController
             }
         }
 
+        // AJAX request → return JSON
+        if ($this->request->isAJAX()) {
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Settings saved successfully',
+            ]);
+        }
+
+        // Normal form POST → redirect with flash (fallback)
         return redirect()->to('/admin/settings')->with('success', 'Settings saved successfully!');
     }
 }

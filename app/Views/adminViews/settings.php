@@ -12,7 +12,19 @@
 
     /* Topbar Save Button */
     .btn-save { background: var(--primary); color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: background 0.2s; }
-    .btn-save:hover { background: var(--primary-hover); }
+    .btn-save:hover:not(:disabled) { background: var(--primary-hover); }
+    .btn-save:disabled { opacity: 0.7; cursor: not-allowed; }
+
+    /* Spinner */
+    .spinner {
+        width: 14px; height: 14px;
+        border: 2px solid rgba(255,255,255,0.4);
+        border-top-color: #fff;
+        border-radius: 50%;
+        display: inline-block;
+        animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
     /* Layout */
     .settings-layout { display: grid; grid-template-columns: 220px 1fr; gap: 1.5rem; align-items: start; }
@@ -49,8 +61,27 @@
     .input-with-prefix .form-control { padding-left: 1.75rem; }
 
     /* Toast */
-    .toast { position: fixed; bottom: 2rem; right: 2rem; background: var(--success); color: white; padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2); z-index: 2000; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 0.75rem; animation: slideInRight 0.3s ease; }
-    @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .toast {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2);
+        z-index: 2000;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        animation: slideInRight 0.3s ease;
+    }
+    .toast-success { background: var(--success); }
+    .toast-error   { background: var(--danger); }
+
+    @keyframes slideInRight  { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes slideOutRight { to   { transform: translateX(100%); opacity: 0; } }
 </style>
 </head>
 <body>
@@ -63,20 +94,14 @@
     <div class="main-content">
         <header class="topbar">
             <h2 style="font-size: 1.25rem; color: var(--text);">Settings</h2>
-            <!-- Form submit button outside the form using the 'form' attribute -->
-            <button type="submit" form="settingsForm" class="btn-save"><img src="<?= base_url('images/save-alt.svg') ?>" 
-           alt="" 
-           style="width: 14px; height: 14px;  "> Save Changes</button>
+            <button type="button" class="btn-save" id="saveBtn" onclick="saveSettings(this)">
+                <img src="<?= base_url('images/save-alt.svg') ?>" alt="" style="width: 14px; height: 14px;">
+                <span id="saveBtnText">Save Changes</span>
+            </button>
         </header>
 
         <div class="content-area">
             
-            <?php if (session()->getFlashdata('success')): ?>
-                <div style="background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; font-weight: 600;">
-                    ✓ <?= session()->getFlashdata('success') ?>
-                </div>
-            <?php endif; ?>
-
             <form id="settingsForm" action="<?= base_url('admin/settings/save') ?>" method="POST">
                 <?= csrf_field() ?>
                 
@@ -84,15 +109,9 @@
                     <!-- LEFT NAV -->
                     <aside class="settings-nav">
                         <div class="settings-nav-title">Settings</div>
-                        <a href="#shop" class="settings-nav-link active" onclick="scrollToSection('shop', this)"><img src="<?= base_url('images/shop-store.svg') ?>" 
-           alt="" 
-           style="width: 15px; height: 15px;  "> Shop Information</a>
-                        <a href="#pricing" class="settings-nav-link" onclick="scrollToSection('pricing', this)"><img src="<?= base_url('images/dollar-currency.svg') ?>" 
-           alt="" 
-           style="width: 15px; height: 15px;  "> Service Pricing</a>
-                        <a href="#sms" class="settings-nav-link" onclick="scrollToSection('sms', this)"><img src="<?= base_url('images/sms-icon.svg') ?>" 
-           alt="" 
-           style="width: 14px; height: 14px;  "> SMS Templates</a>
+                        <a href="#shop" class="settings-nav-link active" onclick="scrollToSection('shop', this)"><img src="<?= base_url('images/shop-store.svg') ?>" alt="" style="width: 15px; height: 15px;"> Shop Information</a>
+                        <a href="#pricing" class="settings-nav-link" onclick="scrollToSection('pricing', this)"><img src="<?= base_url('images/dollar-currency.svg') ?>" alt="" style="width: 15px; height: 15px;"> Service Pricing</a>
+                        <a href="#sms" class="settings-nav-link" onclick="scrollToSection('sms', this)"><img src="<?= base_url('images/sms-icon.svg') ?>" alt="" style="width: 14px; height: 14px;"> SMS Templates</a>
                     </aside>
 
                     <!-- RIGHT CONTENT -->
@@ -102,9 +121,7 @@
                         <div class="settings-card" id="shop">
                             <div class="card-header">
                                 <div>
-                                    <div class="card-title"><img src="<?= base_url('images/shop-store.svg') ?>" 
-           alt="" 
-           style="width: 18px; height: 18px; vertical-align: middle; margin-bottom: 4px; margin-right: 6px;"> Shop Information</div>
+                                    <div class="card-title"><img src="<?= base_url('images/shop-store.svg') ?>" alt="" style="width: 18px; height: 18px; vertical-align: middle; margin-bottom: 4px; margin-right: 6px;"> Shop Information</div>
                                     <div class="card-subtitle">Basic details about your laundry business</div>
                                 </div>
                             </div>
@@ -129,12 +146,10 @@
                             <div class="card-header">
                                 <div>
                                   <div class="card-title">
-  <img src="<?= base_url('images/dollar-currency.svg') ?>" 
-       alt="" 
-       style="width: 18px; height: 18px; vertical-align: middle; margin-bottom: 4px; margin-right: 6px;">
-  Service Pricing
-</div>
-                                    <div class="card-subtitle">Price per kg for each service type</div>
+                                      <img src="<?= base_url('images/dollar-currency.svg') ?>" alt="" style="width: 18px; height: 18px; vertical-align: middle; margin-bottom: 4px; margin-right: 6px;">
+                                      Service Pricing
+                                  </div>
+                                  <div class="card-subtitle">Price per kg for each service type</div>
                                 </div>
                             </div>
                             <div class="settings-form">
@@ -161,28 +176,27 @@
                         <div class="settings-card" id="sms">
                             <div class="card-header">
                                 <div>
-                                    <div class="card-title"><img src="<?= base_url('images/sms-icon.svg') ?>" 
-           alt="" 
-           style="width: 18px; height: 18px; vertical-align: middle; margin-bottom: 4px; margin-right: 6px;"> SMS Templates</div>
+                                    <div class="card-title"><img src="<?= base_url('images/sms-icon.svg') ?>" alt="" style="width: 18px; height: 18px; vertical-align: middle; margin-bottom: 4px; margin-right: 6px;"> SMS Templates</div>
                                     <div class="card-subtitle">Messages sent automatically to customers</div>
                                 </div>
                             </div>
-                        <div class="settings-form">
-    <div class="form-group">
-        <label>Intake Confirmation</label>
-        <textarea name="sms_intake" class="form-control" rows="3"><?= esc($settings['sms_intake'] ?? '') ?></textarea>
-        <div class="helper-text">
-            Tags: <code>{name}</code>, <code>{code}</code>, <code>{weight}</code>, <code>{tracking_link}</code>, <code>{shop_name}</code>
-        </div>
-    </div>
-    <div class="form-group">
-        <label>Ready for Pickup</label>
-        <textarea name="sms_ready" class="form-control" rows="2"><?= esc($settings['sms_ready'] ?? '') ?></textarea>
-        <div class="helper-text">
-            Tags: <code>{name}</code>, <code>{code}</code>, <code>{shop_name}</code>
-        </div>
-    </div>
-</div>
+                            <div class="settings-form">
+                                <div class="form-group">
+                                    <label>Intake Confirmation</label>
+                                    <textarea name="sms_intake" class="form-control" rows="3"><?= esc($settings['sms_intake'] ?? '') ?></textarea>
+                                    <div class="helper-text">
+                                        Tags: <code>{name}</code>, <code>{code}</code>, <code>{weight}</code>, <code>{tracking_link}</code>, <code>{shop_name}</code>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Ready for Pickup</label>
+                                    <textarea name="sms_ready" class="form-control" rows="2"><?= esc($settings['sms_ready'] ?? '') ?></textarea>
+                                    <div class="helper-text">
+                                        Tags: <code>{name}</code>, <code>{code}</code>, <code>{shop_name}</code>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
                     </div>
                 </div>
@@ -192,13 +206,77 @@
 </div>
 
 <script>
-    // Smooth scroll for the left navigation
+    // =========================================
+    // 1. SMOOTH SCROLL NAV
+    // =========================================
     function scrollToSection(id, link) {
         event.preventDefault();
         document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
         document.querySelectorAll('.settings-nav-link').forEach(l => l.classList.remove('active'));
         link.classList.add('active');
     }
+
+    // =========================================
+    // 2. AJAX SAVE WITH SPINNER + TOAST
+    // =========================================
+    async function saveSettings(btn) {
+        const form = document.getElementById('settingsForm');
+        const formData = new FormData(form);
+
+        // Save original content, disable, show spinner
+        const originalHTML = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = `<span class="spinner"></span> <span>Saving...</span>`;
+
+        try {
+            const res = await fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                showToast('✓ ' + (data.message || 'Settings saved successfully'), 'success');
+            } else {
+                showToast(data.message || 'Failed to save settings', 'error');
+            }
+        } catch (err) {
+            console.error(err);
+            showToast('Network error — please try again', 'error');
+        } finally {
+            // Restore button regardless of outcome
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+        }
+    }
+
+    // =========================================
+    // 3. TOAST
+    // =========================================
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        // Auto-remove after 3s
+        setTimeout(() => {
+            toast.style.animation = 'slideOutRight 0.3s ease forwards';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    // =========================================
+    // 4. OPTIONAL: Enter key still submits
+    // =========================================
+    document.getElementById('settingsForm').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+            e.preventDefault();
+            saveSettings(document.getElementById('saveBtn'));
+        }
+    });
 </script>
 
 </body>
