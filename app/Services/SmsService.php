@@ -3,23 +3,35 @@ namespace App\Services;
 
 class SmsService
 {
-    public function send(string $number, string $message): bool
+    /**
+     * Send a single SMS via TextBee.
+     * Returns ['success' => bool, 'message' => string].
+     */
+    public function send(string $number, string $message): array
     {
         $apiKey   = env('TEXTBEE_API_KEY');
         $deviceId = env('TEXTBEE_DEVICE_ID');
 
-        // TextBee requires E.164 format: +639171234567
-        // If your DB stores 0917..., convert it
+        if (empty($apiKey)) {
+            return ['success' => false, 'message' => 'SMS API key not configured'];
+        }
+
+        // Normalize 0917... → +63917...
+        $number = trim($number);
         if (str_starts_with($number, '0')) {
             $number = '+63' . substr($number, 1);
+        }
+        // Strip any dashes or spaces
+        $number = preg_replace('/[^\d+]/', '', $number);
+
+        if (!preg_match('/^\+\d{10,15}$/', $number)) {
+            return ['success' => false, 'message' => 'Invalid phone number format'];
         }
 
         $payload = [
             'recipients' => [$number],
             'message'    => $message,
         ];
-
-        // deviceId is optional — only pass it if you really want to lock to one phone
         if (!empty($deviceId)) {
             $payload['deviceId'] = $deviceId;
         }
@@ -36,11 +48,37 @@ class SmsService
             CURLOPT_TIMEOUT        => 10,
         ]);
 
-        curl_exec($ch);
+        $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
         curl_close($ch);
 
-        // 200 means TextBee accepted it and queued it on the phone — not yet "delivered"
-        return $httpCode === 200;
+        if ($curlError) {
+            return ['success' => false, 'message' => 'Network error: ' . $curlError];
+        }
+
+        if ($httpCode >= 200 && $httpCode < 300) {
+            return ['success' => true, 'message' => 'SMS sent'];
+        }
+
+        // Try to extract a useful error from TextBee's JSON response
+        $decoded = json_decode($response, true);
+        $reason = $decoded['message'] ?? $decoded['error'] ?? "HTTP $httpCode";
+
+        return ['success' => false, 'message' => $reason];
+    }
+
+    /**
+     * Fill placeholders in an SMS template.
+     */
+    public function buildMessage(string $template, array $order, array $settings): string
+    {
+        return strtr($template, [
+            '{name}'          => $order['name'] ?? '',
+            '{code}'          => $order['claim_code'] ?? '',
+            '{weight}'        => $order['weight'] ?? '',
+            '{tracking_link}' => base_url('track/' . ($order['claim_code'] ?? '')),
+            '{shop_name}'     => $settings['shop_name'] ?? '',
+        ]);
     }
 }

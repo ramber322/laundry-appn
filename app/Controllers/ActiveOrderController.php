@@ -74,15 +74,51 @@ class ActiveOrderController extends BaseController
 
     // ---- AJAX ENDPOINTS (Returns JSON) ----
 
-    public function ajaxAdvanceStage()
-    {
-        $orderModel = new OrderModel();
-        $id = $this->request->getPost('id');
-        $stage = $this->request->getPost('stage');
-        
-        $orderModel->update($id, ['stage' => $stage]);
-        return $this->response->setJSON(['status' => 'success']);
+   public function ajaxAdvanceStage()
+{
+    $orderModel = new OrderModel();
+    $id    = $this->request->getPost('id');
+    $stage = $this->request->getPost('stage');
+
+    // Fetch BEFORE update so we have customer data
+    $order = $orderModel->find($id);
+
+    if (!$order) {
+        return $this->response->setStatusCode(404)->setJSON([
+            'status'  => 'error',
+            'message' => 'Order not found.',
+        ]);
     }
+
+    $orderModel->update($id, ['stage' => $stage]);
+
+    // ── SMS #2: only on ready transition, never a duplicate ──
+    $smsResult = null;
+
+    if ($stage === 'ready' && $order['stage'] !== 'ready') {
+        try {
+            $s = (new SettingModel())->getAllKeyed();
+            $template = $s['sms_ready'] ?? '';
+
+            if (!empty($template) && !empty($order['phone'])) {
+                $sms = new \App\Services\SmsService();
+                $message = $sms->buildMessage($template, $order, $s);
+                $smsResult = $sms->send($order['phone'], $message);
+            } else {
+                $smsResult = ['success' => false, 'message' => 'No SMS template or phone'];
+            }
+        } catch (\Throwable $e) {
+            log_message('error', 'SMS ready failed for order ' . ($order['claim_code'] ?? $id) . ': ' . $e->getMessage());
+            $smsResult = ['success' => false, 'message' => 'SMS error'];
+        }
+    }
+
+    return $this->response->setJSON([
+        'status'   => 'success',
+        'sms'      => $smsResult,   // null unless it was a genuine → ready transition
+        'csrfHash' => csrf_hash(),
+    ]);
+}
 
     public function ajaxMarkPaid()
     {
@@ -145,7 +181,6 @@ class ActiveOrderController extends BaseController
     $service = $this->request->getPost('service');
     $weight  = (float) $this->request->getPost('weight');
 
-    // Server-side price recalculation — same logic as saveIntake()
     $rateMap = [
         'Wash & Fold' => (float) ($s['rate_wash_fold'] ?? 55),
         'Wash & Dry'  => (float) ($s['rate_wash_dry']  ?? 50),
@@ -153,9 +188,7 @@ class ActiveOrderController extends BaseController
     $rate  = $rateMap[$service] ?? 0;
     $price = round($weight * $rate, 2);
 
-    // Same code format as saveIntake()
     $claimCode = 'LND-' . rand(1000, 9999);
-
     $isPaid = $this->request->getPost('payment') === 'paid';
 
     $data = [
@@ -173,10 +206,26 @@ class ActiveOrderController extends BaseController
 
     $id = $orderModel->insert($data, true);
 
+    // ── SMS #1: intake ──
+    $smsResult = ['success' => false, 'message' => 'SMS not attempted'];
+    try {
+        $template = $s['sms_intake'] ?? '';
+        if (!empty($template)) {
+            $sms = new \App\Services\SmsService();
+            $message = $sms->buildMessage($template, $data, $s);
+            $smsResult = $sms->send($data['phone'], $message);
+        } else {
+            $smsResult['message'] = 'No SMS template configured';
+        }
+    } catch (\Throwable $e) {
+        log_message('error', 'SMS intake failed for ' . $claimCode . ': ' . $e->getMessage());
+        $smsResult = ['success' => false, 'message' => 'SMS error'];
+    }
+
     return $this->response->setJSON([
-        'status'   => 'success',
-        'message'  => "Order {$claimCode} created successfully!",
-        'order'    => [
+        'status'  => 'success',
+        'message' => "Order {$claimCode} created successfully!",
+        'order'   => [
             'id'         => (int) $id,
             'claim_code' => $claimCode,
             'name'       => $data['name'],
@@ -187,6 +236,7 @@ class ActiveOrderController extends BaseController
             'paid'       => $isPaid ? 1 : 0,
             'stage'      => 'intake',
         ],
+        'sms'      => $smsResult,
         'csrfHash' => csrf_hash(),
     ]);
 }

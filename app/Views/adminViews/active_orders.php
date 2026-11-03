@@ -421,10 +421,9 @@ document.addEventListener('DOMContentLoaded', () => {
 async function saveIntakeInstantly(event) {
     event.preventDefault();
 
-    const form     = event.target;
-    const saveBtn  = form.querySelector('.btn-save');
+    const form    = event.target;
+    const saveBtn = form.querySelector('.btn-save');
 
-    // Collect form values
     const payload = {
         name:    form.querySelector('#input-name').value.trim(),
         phone:   form.querySelector('#input-phone').value.trim(),
@@ -434,13 +433,11 @@ async function saveIntakeInstantly(event) {
         payment: form.querySelector('#input-payment').value,
     };
 
-    // Basic client-side guard
     if (!payload.name || !payload.phone || !payload.service || !payload.weight) {
         showError('Please fill in all required fields.');
         return;
     }
 
-    // Prevent double-submit
     if (saveBtn.disabled) return;
     const originalLabel = saveBtn.textContent;
     saveBtn.disabled = true;
@@ -449,16 +446,20 @@ async function saveIntakeInstantly(event) {
     try {
         const result = await postAction('ajax-save-intake', payload);
 
-        // Instantly add row to the table
         addOrderToTable(result.order);
 
-        // Close modal + reset form
         closeModal('intakeModal');
         form.reset();
         document.getElementById('input-price').value = '0.00';
         document.getElementById('rate-hint').textContent = 'Rate: —';
 
-        showToast(`Order ${result.order.claim_code} saved ✓`);
+        // Two-line toast — SMS result decides the icon/color
+        if (result.sms && result.sms.success) {
+            showToast(`Order ${result.order.claim_code} saved · SMS sent`);
+        } else {
+            const reason = result.sms?.message || 'SMS not sent';
+            showToast(`Order ${result.order.claim_code} saved · ${reason}`, true);
+        }
     } catch (error) {
         showError(error.message);
     } finally {
@@ -685,7 +686,7 @@ function markPaid(id) {
     updatePaymentCell(row);
     filterTable();
     closeActionMenu();
-    showToast('Marked as Paid ✓');
+    showToast('Marked as Paid ');
 
     postAction('ajax-mark-paid', { id })
         .catch(error => {
@@ -750,6 +751,17 @@ function finishMarkReady() {
     showToast('Order marked as Ready');
 
     saveStageInBackground(id, 'ready')
+        .then(result => {
+            // result.sms is null for non-ready stages, or {success, message} for ready
+            if (result && result.sms) {
+                if (result.sms.success) {
+                    showToast('Ready SMS sent to customer');
+                } else {
+                    const reason = result.sms.message || 'SMS not sent';
+                    showToast(`Ready · ${reason}`, true);
+                }
+            }
+        })
         .catch(error => {
             row.dataset.stage = previousStage;
             renderOrder(row);
@@ -1088,20 +1100,21 @@ function escapeHTML(value) {
     })[character]);
 }
 
-function showToast(message) {
+function showToast(message, isWarning = false) {
     const toast = document.createElement('div');
     toast.className = 'toast';
 
     const icon = document.createElement('span');
-    icon.textContent = '✓';
+    icon.textContent = isWarning ? '⚠' : '✓';
 
     const text = document.createElement('span');
     text.textContent = message;
 
     toast.append(icon, text);
+    if (isWarning) toast.style.background = 'var(--warning, #f59e0b)';
     document.body.appendChild(toast);
 
-    window.setTimeout(() => toast.remove(), 3000);
+    window.setTimeout(() => toast.remove(), isWarning ? 4500 : 3000);
 }
 
 function showError(message) {
